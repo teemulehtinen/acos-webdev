@@ -1,0 +1,63 @@
+.acos-webdev-exercise {
+  overflow: hidden;
+}
+.acos-webdev-exercise .guide-column {
+  width: 40%;
+  float: right;
+  border-left: 1px dashed grey;
+  background-color: cornsilk;
+  padding: 2em;
+}
+.acos-webdev-exercise .instructions, .acos-webdev-exercise .state {
+  margin: 0 0 2em 0;
+}
+.acos-webdev-exercise .points {
+  display: inline-block;
+  border-radius: 0.8em;
+  background-color: gainsboro;
+  padding: 0.5em;
+  color: grey;
+  font-weight: bold;
+}
+.acos-webdev-exercise button {
+  border: 1px solid silver;
+  border-radius: 0.5em;
+  background-color: transparent;
+  padding: 0.5em 1em;
+  color: grey;
+  font-family: inherit;
+  font-size: 90%;
+  font-weight: bold;
+}
+.acos-webdev-exercise .red {
+  background-color: salmon;
+  border-color: crimson;
+  color: darkred;
+}
+.acos-webdev-exercise .yellow {
+  background-color: yellow;
+  border-color: gold;
+  color: orange;
+}
+.acos-webdev-exercise .green {
+  background-color: springgreen;
+  border-color: limegreen;
+  color: green;
+}
+.acos-webdev-exercise button:hover {
+  border-color: white;
+  background-color: steelblue;
+  color: white;
+  cursor: pointer;
+}
+.acos-webdev-poi {
+  display: inline-block;
+  border: 1px solid skyblue;
+  border-radius: 0.8em;
+  background-color: lightcyan;
+  padding: 2em;
+  min-height: 1em;
+}
+li.acos-webdev-poi {
+  margin-right: 1em;
+}
