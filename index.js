@@ -37,11 +37,15 @@ WEBDEV.addToBody = function (params) {
     return '';
 };
 
+WEBDEV.uniqueUserID = function (req) {
+  /* Try the known protocol values or fallback to zero. */
+  return parseInt((req.body.user_id || req.query.uid || '0').match(/\d+/g).join(''))
+}
+
 WEBDEV.initialize = function (req, params, handlers, cb) {
 
   // Select AB-test population
-  var u = parseInt((req.body.user_id || req.query.uid || '0').match(/\d+/g).join(''));
-  params.abFlag = u % 2 == 1;
+  params.abFlag = WEBDEV.uniqueUserID(req) % 2 == 1;
 
   // Initialize the content type
   params.headContent += WEBDEV.addToHead(params);
