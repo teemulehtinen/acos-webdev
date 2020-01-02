@@ -3,19 +3,35 @@
 
 "use strict";
 
-function ACOSWebdev($element, config, acceptTest, pointsCalculator) {
+function ACOSWebdev($element, config, points) {
   this.$element = $element;
   this.config = config;
-  function functionOrUndefined(p) {
-    return typeof(p) == 'function' ? p : undefined;
-  }
-  this.config.acceptTest = functionOrUndefined(acceptTest);
-  this.config.pointsCalculator = functionOrUndefined(pointsCalculator);
+  this.config.points = points;
+  this.log = [];
   var self = this;
+
+  let observer = new MutationObserver(function (mutations) {
+    mutations.forEach(function (mutation) {
+      var n = mutation.type == 'characterData' ? mutation.target.parentNode : mutation.target;
+      self.log.push({
+        type: mutation.type,
+        changed: n.outerHTML
+      });
+    });
+    if (self.config.mutations) {
+      self.grade(mutations);
+    }
+  });
+  observer.observe($element.find('.exercise').get(0), {
+    attributes: true,
+    childList: true,
+    characterData: true,
+    subtree: true
+  });
 
   self.reset();
 
-  $element.find('.reset-button').on('click', function (event) {
+  $element.find('.guide-column .reset-button').on('click', function (event) {
     self.reset();
   });
 };
@@ -26,7 +42,8 @@ ACOSWebdev.prototype.reset = function () {
   var self = this;
 
   // Populate problem data.
-  $element.find('.instructions').html(config.instructions);
+  $element.find('.guide-column .instructions').html(config.instructions);
+  $element.find('.guide-column .feedback').remove();
   this.updatePointsDisplay(0);
   $element.find('.exercise').html(config.html);
 
@@ -36,13 +53,22 @@ ACOSWebdev.prototype.reset = function () {
       if (config.eventPreventDefault) {
         event.preventDefault();
       }
-      if (config.acceptTest ? config.acceptTest($element, config, event) : true) {
-        self.update(config.pointsCalculator ? config.pointsCalculator($element, config, event) : config.maxPoints);
-      }
+      self.grade(event);
     });
   }
+};
 
-  //TODO dom monitor and logging
+ACOSWebdev.prototype.grade = function (eventOrMutations) {
+  if (typeof(this.config.points) == 'function') {
+    let r = this.config.points(this.$element, this.config, eventOrMutations);
+    if (typeof(r) == 'number') {
+      this.update(r);
+    } else if (r !== undefined && typeof(r.points) == 'number') {
+      this.update(r.points, r.feedback);
+    }
+  } else {
+    this.update(this.config.maxPoints);
+  }
 };
 
 ACOSWebdev.prototype.updatePointsDisplay = function (points, colorClass) {
@@ -52,14 +78,18 @@ ACOSWebdev.prototype.updatePointsDisplay = function (points, colorClass) {
     .text(points + " / " + this.config.maxPoints + " p.");
 };
 
-ACOSWebdev.prototype.update = function (points) {
+ACOSWebdev.prototype.update = function (points, feedback) {
   var ab = this.config.abFlag;
   var mp = this.config.maxPoints;
   var p = Math.max(0, Math.min(points, mp));
+  if (!feedback) {
+    feedback = p >= mp ? 'Problem solved succesfully.' : (p > 0 ? 'Problem solved partially.' : 'Problem not solved yet.');
+  }
   var col = p >= mp ? 'green' : (p > 0 ? 'yellow' : 'red');
-  var txt = p >= mp ? 'Problem solved succesfully.' : (p > 0 ? 'Problem solved partially.' : 'Problem not solved yet.');
+  this.$element.find('.guide-column .feedback').remove();
+  this.$element.find('.guide-column .state').prepend('<p class="feedback">' + feedback + '</p>');
   this.updatePointsDisplay(p, col).ACOSWebdevExplosion(col, ab);
-  ACOS.sendEvent('grade', {'points': p, 'max_points': mp, 'status': 'graded', 'feedback': txt, 'ab': ab});
+  ACOS.sendEvent('grade', {'points': p, 'max_points': mp, 'status': 'graded', 'feedback': feedback, 'log': this.log, 'ab': ab});
 };
 
 /****

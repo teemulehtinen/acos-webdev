@@ -11,6 +11,10 @@
 .acos-webdev-exercise .instructions, .acos-webdev-exercise .state {
   margin: 0 0 2em 0;
 }
+.acos-webdev-exercise .feedback {
+  font-weight: bold;
+  color: green;
+}
 .acos-webdev-exercise .points {
   display: inline-block;
   border-radius: 0.8em;
@@ -44,11 +48,20 @@
   border-color: limegreen;
   color: green;
 }
+.acos-webdev-exercise .blue {
+  color: lightblue;
+}
 .acos-webdev-exercise button:hover {
   border-color: white;
   background-color: steelblue;
   color: white;
   cursor: pointer;
+}
+.acos-webdev-exercise button:disabled {
+  background-color: grey;
+  border-color: darkgrey;
+  color: darkgrey;
+  cursor: auto;
 }
 .acos-webdev-poi {
   display: inline-block;
