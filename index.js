@@ -44,23 +44,24 @@ Type.initialize = function (req, params, handlers, cb) {
 
   // Initialize the content package
   handlers.contentPackages[req.params.contentPackage].initialize(req, params, handlers, function (config) {
-    config.abFlag = abFlag
+    if (config) {
+      config.abFlag = abFlag
 
-    if (config.template) {
-      config.html = nj.render(config.template, config);
+      if (config.template) {
+        config.html = nj.render(config.template, config);
+      }
+
+      let templateParam = {
+        id: 'acos-' + req.params.contentPackage + '-' + params.name,
+        class: 'acos-' + req.params.contentType + '-exercise acos-' + req.params.contentPackage,
+        resetButton: config.resetButton,
+        config: JSON.stringify(config),
+        script: typeof(config.script) == 'function' ? config.script.toString() : undefined,
+        points: typeof(config.points) == 'function' ? config.points.toString() : undefined
+      };
+      params.headContent += nj.render('head.html', templateParam);
+      params.bodyContent += nj.render('body.html', templateParam);
     }
-
-    let templateParam = {
-      id: 'acos-' + req.params.contentPackage + '-' + params.name,
-      class: 'acos-' + req.params.contentType + '-exercise acos-' + req.params.contentPackage,
-      resetButton: config.resetButton,
-      config: JSON.stringify(config),
-      script: typeof(config.script) == 'function' ? config.script.toString() : undefined,
-      points: typeof(config.points) == 'function' ? config.points.toString() : undefined
-    };
-    params.headContent += nj.render('head.html', templateParam);
-    params.bodyContent += nj.render('body.html', templateParam);
-
     cb();
   });
 };
