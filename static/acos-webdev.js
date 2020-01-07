@@ -49,7 +49,8 @@ ACOSWebdev.prototype.reset = function () {
 
   // Add configured event listener.
   if (config.selector && config.events) {
-    $element.find(config.selector).on(config.events, function (event) {
+    let $selected = config.selector == '$window' ? $(window) : (config.selector == '$window.parent' ? $(window.parent) : $element.find(config.selector));
+    $selected.on(config.events, function (event) {
       if (config.eventPreventDefault) {
         event.preventDefault();
       }
