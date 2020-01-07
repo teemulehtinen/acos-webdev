@@ -68,9 +68,9 @@ Type.initialize = function (req, params, handlers, cb) {
 Type.handleEvent = function (event, payload, req, res, protocolPayload, responseObj, cb) {
   if (event == 'log' || event == 'grade') {
     var dir = Type.logDirectory + req.params.contentPackage;
-    fs.mkdir(dir, '0775¨', function (err) {
+    fs.mkdir(dir, '0775', function (err) {
       var data = new Date().toISOString()
-        + '\t' + JSON.stringify(payload.log)
+        + '\t' + JSON.stringify(payload)
         + '\t' + JSON.stringify(protocolPayload || {}) + '\n';
       var logName = req.params.name.replace(/\.|\/|\\|~/g, "-") + '.log';
       fs.writeFile(dir + '/' + logName, data, {flag: 'a'}, function (err) {

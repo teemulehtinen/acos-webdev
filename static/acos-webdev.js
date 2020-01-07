@@ -43,7 +43,7 @@ ACOSWebdev.prototype.reset = function () {
 
   // Populate problem data.
   $element.find('.guide-column .instructions').html(config.instructions);
-  $element.find('.guide-column .feedback').remove();
+  $element.find('.guide-column .feedback').empty();
   this.updatePointsDisplay(0);
   $element.find('.exercise').html(config.html);
 
@@ -86,8 +86,7 @@ ACOSWebdev.prototype.update = function (points, feedback) {
     feedback = p >= mp ? 'Problem solved succesfully.' : (p > 0 ? 'Problem solved partially.' : 'Problem not solved yet.');
   }
   var col = p >= mp ? 'green' : (p > 0 ? 'yellow' : 'red');
-  this.$element.find('.guide-column .feedback').remove();
-  this.$element.find('.guide-column .state').prepend('<p class="feedback">' + feedback + '</p>');
+  this.$element.find('.guide-column .feedback').empty().append('<p>' + feedback + '</p>');
   this.updatePointsDisplay(p, col).ACOSWebdevExplosion(col, ab);
   ACOS.sendEvent('grade', {'points': p, 'max_points': mp, 'status': 'graded', 'feedback': feedback, 'log': this.log, 'ab': ab});
 };
