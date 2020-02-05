@@ -57,6 +57,8 @@ ACOSWebdev.prototype.reset = function () {
       self.grade(event);
     });
   }
+
+  window.parent.postMessage({type: 'acos-resizeiframe-init'}, '*');
 };
 
 ACOSWebdev.prototype.grade = function (eventOrMutations) {
@@ -89,6 +91,7 @@ ACOSWebdev.prototype.update = function (points, feedback) {
   var col = p >= mp ? 'green' : (p > 0 ? 'yellow' : 'red');
   this.$element.find('.guide-column .feedback').empty().append('<p>' + feedback + '</p>');
   this.updatePointsDisplay(p, col).ACOSWebdevExplosion(col, ab);
+  window.parent.postMessage({type: 'acos-resizeiframe-init'}, '*');
   ACOS.sendEvent('grade', {'points': p, 'max_points': mp, 'status': 'graded', 'feedback': feedback, 'log': this.log, 'ab': ab});
 };
 
