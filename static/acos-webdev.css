@@ -4,15 +4,17 @@ body {
 .acos-webdev-exercise {
   overflow: hidden;
 }
-.acos-webdev-exercise .guide-column {
+.acos-webdev-exercise.horizontal .toolbox {
   width: 40%;
   float: right;
   border-left: 1px dashed grey;
   padding: 0 3%;
 }
 .acos-webdev-exercise .exercise {
-  width: 50%;
   padding: 0.5em;
+}
+.acos-webdev-exercise.horizontal .exercise {
+  width: 50%;
 }
 .acos-webdev-exercise .instructions {
   margin: 0 0 2em 0;

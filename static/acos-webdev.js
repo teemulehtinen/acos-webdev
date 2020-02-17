@@ -10,30 +10,34 @@ function ACOSWebdev($element, config, points) {
   this.log = [];
   var self = this;
 
-  let observer = new MutationObserver(function (mutations) {
-    mutations.forEach(function (mutation) {
-      var n = mutation.type == 'characterData' ? mutation.target.parentNode : mutation.target;
-      self.log.push({
-        type: mutation.type,
-        changed: n.outerHTML
+  if (config.mutationObserver) {
+    let observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        var n = mutation.type == 'characterData' ? mutation.target.parentNode : mutation.target;
+        self.log.push({
+          type: mutation.type,
+          changed: n.outerHTML
+        });
       });
+      if (self.config.mutations) {
+        self.grade(mutations);
+      }
     });
-    if (self.config.mutations) {
-      self.grade(mutations);
-    }
-  });
-  observer.observe($element.find('.exercise').get(0), {
-    attributes: true,
-    childList: true,
-    characterData: true,
-    subtree: true
-  });
+    observer.observe($element.find('.exercise').get(0), {
+      attributes: true,
+      childList: true,
+      characterData: true,
+      subtree: true
+    });
+  }
 
   self.reset();
 
-  $element.find('.guide-column .reset-button').on('click', function (event) {
-    self.reset();
-  });
+  if (config.resetButton) {
+    $element.find('.toolbox .reset-button').on('click', function (event) {
+      self.reset();
+    });
+  }
 };
 
 ACOSWebdev.prototype.reset = function () {
@@ -42,10 +46,12 @@ ACOSWebdev.prototype.reset = function () {
   var self = this;
 
   // Populate problem data.
-  $element.find('.guide-column .instructions').html(config.instructions);
-  $element.find('.guide-column .feedback').empty();
+  $element.find('.instructions').html(config.instructions);
+  $element.find('.toolbox .feedback').empty();
   this.updatePointsDisplay(0);
   $element.find('.exercise').html(config.html);
+
+  this.extendReset();
 
   // Add configured event listener.
   if (config.selector && config.events) {
@@ -61,9 +67,12 @@ ACOSWebdev.prototype.reset = function () {
   window.parent.postMessage({type: 'acos-resizeiframe-init'}, '*');
 };
 
+ACOSWebdev.prototype.extendReset = function () {
+};
+
 ACOSWebdev.prototype.grade = function (eventOrMutations) {
   if (typeof(this.config.points) == 'function') {
-    let r = this.config.points(this.$element, this.config, eventOrMutations);
+    let r = this.extendGrade(eventOrMutations);
     if (typeof(r) == 'number') {
       this.update(r);
     } else if (r !== undefined && typeof(r.points) == 'number') {
@@ -72,6 +81,10 @@ ACOSWebdev.prototype.grade = function (eventOrMutations) {
   } else {
     this.update(this.config.maxPoints);
   }
+};
+
+ACOSWebdev.prototype.extendGrade = function (eventOrMutations) {
+  return this.config.points(this.$element, this.config, eventOrMutations);
 };
 
 ACOSWebdev.prototype.updatePointsDisplay = function (points, colorClass) {

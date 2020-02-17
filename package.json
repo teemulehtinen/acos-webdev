@@ -1,6 +1,6 @@
 {
   "name": "acos-webdev",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Webdev content type for Acos-servers",
   "main": "index.js",
   "scripts": {},
@@ -9,7 +9,8 @@
     "name": "Teemu Lehtinen"
   },
   "dependencies": {
-    "fs": "0.0.2"
+    "fs": "0.0.2",
+    "nunjucks": "^3.1.3"
   },
   "license": "MIT"
 }

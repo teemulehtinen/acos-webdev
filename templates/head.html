@@ -1,5 +1,6 @@
 <link href="/static/webdev/acos-webdev.css" rel="stylesheet">
 <script src="/static/webdev/acos-webdev.js" type="text/javascript"></script>
+{{ addToHead }}
 <script type="text/javascript">
   $(document).ready(function () { new ACOSWebdev($('#{{ id }}'), {{ config }}{% if points %}, {{ points }}{% endif %}); });
   {% if script %}{{ script }}{% endif %}

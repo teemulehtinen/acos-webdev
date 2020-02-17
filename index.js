@@ -36,8 +36,6 @@ Type.uniqueUserID = function (req) {
 }
 
 Type.initialize = function (req, params, handlers, cb) {
-  let templateDir = baseDir + '/templates/';
-  nj.configure(templateDir, { autoescape: false });
 
   // Select AB-test population
   let abFlag = Type.uniqueUserID(req) % 2 == 1;
@@ -45,20 +43,22 @@ Type.initialize = function (req, params, handlers, cb) {
   // Initialize the content package
   handlers.contentPackages[req.params.contentPackage].initialize(req, params, handlers, function (config) {
     if (config) {
-      config.abFlag = abFlag
-
-      if (config.template) {
-        config.html = nj.render(config.template, config);
-      }
+      let addToHead = config.addToHead;
+      config.addToHead = undefined;
+      config.abFlag = abFlag;
 
       let templateParam = {
         id: 'acos-' + req.params.contentPackage + '-' + params.name,
         class: 'acos-' + req.params.contentType + '-exercise acos-' + req.params.contentPackage,
-        resetButton: config.resetButton,
+        addToHead: addToHead,
+        verticalLayout: config.verticalLayout || false,
+        resetButton: config.resetButton || false,
         config: JSON.stringify(config),
         script: typeof(config.script) == 'function' ? config.script.toString() : undefined,
         points: typeof(config.points) == 'function' ? config.points.toString() : undefined
       };
+      let templateDir = baseDir + '/templates/';
+      nj.configure(templateDir, { autoescape: false });
       params.headContent += nj.render('head.html', templateParam);
       params.bodyContent += nj.render('body.html', templateParam);
     }
@@ -67,6 +67,7 @@ Type.initialize = function (req, params, handlers, cb) {
 };
 
 Type.handleEvent = function (event, payload, req, res, protocolPayload, responseObj, cb) {
+  // TODO: check if aplus grading data can be posted (log with that name)
   if (event == 'log' || event == 'grade') {
     var dir = Type.logDirectory + req.params.contentPackage;
     fs.mkdir(dir, '0775', function (err) {
