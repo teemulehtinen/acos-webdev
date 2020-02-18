@@ -16,12 +16,19 @@ body {
 .acos-webdev-exercise.horizontal .exercise {
   width: 50%;
 }
-.acos-webdev-exercise .instructions {
+.acos-webdev-exercise > .instructions {
+  margin: 0;
+}
+.acos-webdev-exercise .toolbox .instructions {
+  padding: 0;
   margin: 0 0 2em 0;
 }
 .acos-webdev-exercise .state {
   float: left;
   margin-right: 1em;
+}
+.acos-webdev-exercise .trigger-button {
+  margin: 0 0 0.5em 0;
 }
 .acos-webdev-exercise .feedback p {
   font-weight: bold;
@@ -35,6 +42,11 @@ body {
   color: grey;
   font-weight: bold;
   margin: 0 0 0.5em 0;
+}
+.acos-webdev-exercise.vertical .trigger-button,
+.acos-webdev-exercise.vertical .points {
+  float: left;
+  margin: 0 1em 0 0;
 }
 .acos-webdev-exercise button {
   border: 1px solid silver;

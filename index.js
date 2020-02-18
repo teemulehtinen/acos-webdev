@@ -52,6 +52,7 @@ Type.initialize = function (req, params, handlers, cb) {
         class: 'acos-' + req.params.contentType + '-exercise acos-' + req.params.contentPackage,
         addToHead: addToHead,
         verticalLayout: config.verticalLayout || false,
+        triggerButton: config.triggerButton || false,
         resetButton: config.resetButton || false,
         config: JSON.stringify(config),
         script: typeof(config.script) == 'function' ? config.script.toString() : undefined,
@@ -61,6 +62,8 @@ Type.initialize = function (req, params, handlers, cb) {
       nj.configure(templateDir, { autoescape: false });
       params.headContent += nj.render('head.html', templateParam);
       params.bodyContent += nj.render('body.html', templateParam);
+    } else {
+      params.bodyContent += '<p>No content found.</p>';
     }
     cb();
   });

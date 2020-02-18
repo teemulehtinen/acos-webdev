@@ -31,16 +31,21 @@ function ACOSWebdev($element, config, points) {
     });
   }
 
-  self.reset();
+  self.reset(true);
 
+  if (config.triggerButton) {
+    $element.find('.toolbox .trigger-button').on('click', function (event) {
+      self.grade(event);
+    });
+  }
   if (config.resetButton) {
     $element.find('.toolbox .reset-button').on('click', function (event) {
-      self.reset();
+      self.reset(true);
     });
   }
 };
 
-ACOSWebdev.prototype.reset = function () {
+ACOSWebdev.prototype.reset = function (initial) {
   var $element = this.$element;
   var config = this.config;
   var self = this;
@@ -51,7 +56,7 @@ ACOSWebdev.prototype.reset = function () {
   this.updatePointsDisplay(0);
   $element.find('.exercise').html(config.html);
 
-  this.extendReset();
+  this.extendReset(initial);
 
   // Add configured event listener.
   if (config.selector && config.events) {
@@ -64,31 +69,38 @@ ACOSWebdev.prototype.reset = function () {
     });
   }
 
+  if (initial) {
+    $element.find('.points').hide();
+  }
+
   window.parent.postMessage({type: 'acos-resizeiframe-init'}, '*');
 };
 
-ACOSWebdev.prototype.extendReset = function () {
+ACOSWebdev.prototype.extendReset = function (initial) {
 };
 
 ACOSWebdev.prototype.grade = function (eventOrMutations) {
+  var self = this;
   if (typeof(this.config.points) == 'function') {
-    let r = this.extendGrade(eventOrMutations);
-    if (typeof(r) == 'number') {
-      this.update(r);
-    } else if (r !== undefined && typeof(r.points) == 'number') {
-      this.update(r.points, r.feedback);
-    }
+    this.extendGrade(eventOrMutations, function (r) {
+      if (typeof(r) == 'number') {
+        self.update(r);
+      } else if (r !== undefined && typeof(r.points) == 'number') {
+        self.update(r.points, r.feedback);
+      }
+    });
   } else {
     this.update(this.config.maxPoints);
   }
 };
 
-ACOSWebdev.prototype.extendGrade = function (eventOrMutations) {
-  return this.config.points(this.$element, this.config, eventOrMutations);
+ACOSWebdev.prototype.extendGrade = function (eventOrMutations, cb) {
+  cb(this.config.points(this.$element, this.config, eventOrMutations));
 };
 
 ACOSWebdev.prototype.updatePointsDisplay = function (points, colorClass) {
   return this.$element.find('.points')
+    .show()
     .removeClass('red yellow green')
     .addClass(colorClass ? colorClass : '')
     .text(points + " / " + this.config.maxPoints + " p.");
@@ -102,9 +114,10 @@ ACOSWebdev.prototype.update = function (points, feedback) {
     feedback = p >= mp ? 'Problem solved succesfully.' : (p > 0 ? 'Problem solved partially.' : 'Problem not solved yet.');
   }
   var col = p >= mp ? 'green' : (p > 0 ? 'yellow' : 'red');
-  this.$element.find('.guide-column .feedback').empty().append('<p>' + feedback + '</p>');
+  this.$element.find('.toolbox .feedback').empty().append('<p>' + feedback + '</p>');
   this.updatePointsDisplay(p, col).ACOSWebdevExplosion(col, ab);
   window.parent.postMessage({type: 'acos-resizeiframe-init'}, '*');
+  // TODO: implement way to store HTML feedback in content types (browsing old sumbissions)
   ACOS.sendEvent('grade', {'points': p, 'max_points': mp, 'status': 'graded', 'feedback': feedback, 'log': this.log, 'ab': ab});
 };
 

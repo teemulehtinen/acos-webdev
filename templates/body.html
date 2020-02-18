@@ -8,6 +8,9 @@
 		<p class="instructions"></p>
 		{% endif %}
 		<div class="state">
+			{% if triggerButton %}
+			<button class="trigger-button green">{{ triggerButton }}</button>
+			{% endif %}
 			<div class="points"></div>
 			{% if resetButton %}
 			<button class="reset-button">Reset</button>
