@@ -154,10 +154,15 @@ ACOSWebdev.prototype.update = function (points, feedback) {
     'points': p,
     'max_points': mp,
     'status': 'graded',
-    'feedback': this.$element.find('.exercise').html() + this.$element.find('.toolbox .feedback').html(),
+    'feedback': this.extendProtocolFeedback(feedback),
     'log': JSON.stringify(this.log),
     'ab': ab
   });
+};
+
+ACOSWebdev.prototype.extendProtocolFeedback = function (feedback) {
+  return this.$element.find('.exercise').html()
+    + this.$element.find('.toolbox .feedback').html();
 };
 
 /****
