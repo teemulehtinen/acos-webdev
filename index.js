@@ -70,7 +70,6 @@ Type.initialize = function (req, params, handlers, cb) {
 };
 
 Type.handleEvent = function (event, payload, req, res, protocolPayload, responseObj, cb) {
-  // TODO: check if aplus grading data can be posted (log with that name)
   if (event == 'log' || event == 'grade') {
     var dir = Type.logDirectory + req.params.contentPackage;
     fs.mkdir(dir, '0775', function (err) {

@@ -8,6 +8,7 @@ function ACOSWebdev($element, config, points) {
   this.config = config;
   this.config.points = points;
   this.log = [];
+  this.touched = false;
   var self = this;
 
   if (config.mutationObserver) {
@@ -16,7 +17,8 @@ function ACOSWebdev($element, config, points) {
         var n = mutation.type == 'characterData' ? mutation.target.parentNode : mutation.target;
         self.log.push({
           type: mutation.type,
-          changed: n.outerHTML
+          changed: n.outerHTML,
+          time: new Date().getTime()
         });
       });
       if (self.config.mutations) {
@@ -43,12 +45,43 @@ function ACOSWebdev($element, config, points) {
       self.reset(true);
     });
   }
+  $element.on('click', function (event) {
+    self.log.push({
+      type: 'mouseClick',
+      x: event.clientX,
+      y: event.clientY,
+      target: event.target.localName,
+      time: new Date().getTime()
+    });
+    self.touched = true;
+  });
+  window.onblur = function (event) {
+    if (self.touched) {
+      self.log.push({
+        type: 'windowBlur',
+        time: new Date().getTime()
+      });
+    }
+  };
+  window.onfocus = function (event) {
+    if (self.touched) {
+      self.log.push({
+        type: 'windowFocus',
+        time: new Date().getTime()
+      });
+    }
+  };
 };
 
 ACOSWebdev.prototype.reset = function (initial) {
   var $element = this.$element;
   var config = this.config;
   var self = this;
+
+  this.log.push({
+    type: 'reset',
+    time: new Date().getTime()
+  });
 
   // Populate problem data.
   $element.find('.instructions').html(config.instructions);
@@ -117,8 +150,14 @@ ACOSWebdev.prototype.update = function (points, feedback) {
   this.$element.find('.toolbox .feedback').empty().append('<p>' + feedback + '</p>');
   this.updatePointsDisplay(p, col).ACOSWebdevExplosion(col, ab);
   window.parent.postMessage({type: 'acos-resizeiframe-init'}, '*');
-  // TODO: implement way to store HTML feedback in content types (browsing old sumbissions)
-  ACOS.sendEvent('grade', {'points': p, 'max_points': mp, 'status': 'graded', 'feedback': feedback, 'log': this.log, 'ab': ab});
+  ACOS.sendEvent('grade', {
+    'points': p,
+    'max_points': mp,
+    'status': 'graded',
+    'feedback': this.$element.find('.exercise').html() + this.$element.find('.toolbox .feedback').html(),
+    'log': JSON.stringify(this.log),
+    'ab': ab
+  });
 };
 
 /****
