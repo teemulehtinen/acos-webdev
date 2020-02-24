@@ -45,6 +45,7 @@ function ACOSWebdev($element, config, points) {
       self.reset(true);
     });
   }
+
   $element.on('click', function (event) {
     self.log.push({
       type: 'mouseClick',
