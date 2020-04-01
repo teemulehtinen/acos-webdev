@@ -143,7 +143,7 @@ ACOSWebdev.prototype.updatePointsDisplay = function (points, colorClass) {
 ACOSWebdev.prototype.update = function (points, feedback) {
   var ab = this.config.abFlag;
   var mp = this.config.maxPoints;
-  var p = Math.max(0, Math.min(points, mp));
+  var p = Math.max(0, Math.min(Math.round(points), mp));
   if (!feedback) {
     feedback = p >= mp ? 'Problem solved succesfully.' : (p > 0 ? 'Problem solved partially.' : 'Problem not solved yet.');
   }
