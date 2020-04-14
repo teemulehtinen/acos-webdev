@@ -43,14 +43,20 @@ Type.initialize = function (req, params, handlers, cb) {
   // Initialize the content package
   handlers.contentPackages[req.params.contentPackage].initialize(req, params, handlers, function (config) {
     if (config) {
+      let addToTop = config.addToTop;
       let addToHead = config.addToHead;
+      let addToBody = config.addToBody;
+      config.addToTop = undefined;
       config.addToHead = undefined;
+      config.addToBody = undefined;
       config.abFlag = abFlag;
 
       let templateParam = {
         id: 'acos-' + req.params.contentPackage + '-' + params.name,
         class: 'acos-' + req.params.contentType + '-exercise acos-' + req.params.contentPackage,
+        addToTop: addToTop,
         addToHead: addToHead,
+        addToBody: addToBody,
         verticalLayout: config.verticalLayout || false,
         triggerButton: config.triggerButton || false,
         resetButton: config.resetButton || false,

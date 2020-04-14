@@ -2,6 +2,7 @@
 	{% if verticalLayout %}
 	<p class="instructions"></p>
 	<div class="exercise"></div>
+	{{ addToBody }}
 	{% endif %}
 	<div class="toolbox">
 		{% if not verticalLayout %}
@@ -20,5 +21,6 @@
 	</div>
 	{% if not verticalLayout %}
 	<div class="exercise"></div>
+	{{ addToBody }}
 	{% endif %}
 </div>

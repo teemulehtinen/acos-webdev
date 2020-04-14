@@ -7,7 +7,9 @@ function ACOSWebdev($element, config, points) {
   this.$element = $element;
   this.config = config;
   this.config.points = points;
+  this.session = this.uuid();
   this.log = [];
+  this.logQueue = 0;
   this.touched = false;
   var self = this;
 
@@ -55,6 +57,11 @@ function ACOSWebdev($element, config, points) {
       time: new Date().getTime()
     });
     self.touched = true;
+    self.logQueue++;
+    if (self.logQueue > 3) {
+      self.store('logqueue');
+      self.logQueue = 0;
+    }
   });
   window.onblur = function (event) {
     if (self.touched) {
@@ -72,6 +79,9 @@ function ACOSWebdev($element, config, points) {
       });
     }
   };
+  window.addEventListener('beforeunload', function (event) {
+    self.store('unload');
+  });
 };
 
 ACOSWebdev.prototype.reset = function (initial) {
@@ -121,6 +131,14 @@ ACOSWebdev.prototype.grade = function (eventOrMutations) {
         self.update(r);
       } else if (r !== undefined && typeof(r.points) == 'number') {
         self.update(r.points, r.feedback);
+      } else {
+        r.time = new Date().getTime();
+        self.log.push(r);
+        self.logQueue++;
+        if (self.logQueue > 3) {
+          self.store('logqueue');
+          self.logQueue = 0;
+        }
       }
     });
   } else {
@@ -154,6 +172,7 @@ ACOSWebdev.prototype.update = function (points, feedback) {
   ACOS.sendEvent('grade', {
     'points': p,
     'max_points': mp,
+    'session': this.session,
     'status': 'graded',
     'feedback': this.extendProtocolFeedback(feedback),
     'log': JSON.stringify(this.log),
@@ -161,9 +180,25 @@ ACOSWebdev.prototype.update = function (points, feedback) {
   });
 };
 
+ACOSWebdev.prototype.store = function (status) {
+  ACOS.sendEvent('log', {
+    'session': this.session,
+    'status': status,
+    'log': JSON.stringify(this.log),
+    'ab': this.config.abFlag
+  });
+};
+
 ACOSWebdev.prototype.extendProtocolFeedback = function (feedback) {
   return this.$element.find('.exercise').html()
     + this.$element.find('.toolbox .feedback').html();
+};
+
+ACOSWebdev.prototype.uuid = function () {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 };
 
 /****
