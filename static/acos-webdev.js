@@ -176,6 +176,7 @@ ACOSWebdev.prototype.update = function (points, feedback) {
     'status': 'graded',
     'feedback': this.extendProtocolFeedback(feedback),
     'log': JSON.stringify(this.log),
+    'u': this.config.u,
     'ab': ab
   });
 };
@@ -185,6 +186,7 @@ ACOSWebdev.prototype.store = function (status) {
     'session': this.session,
     'status': status,
     'log': JSON.stringify(this.log),
+    'u': this.config.u,
     'ab': this.config.abFlag
   });
 };

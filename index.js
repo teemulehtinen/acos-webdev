@@ -38,7 +38,8 @@ Type.uniqueUserID = function (req) {
 Type.initialize = function (req, params, handlers, cb) {
 
   // Select AB-test population
-  let abFlag = Type.uniqueUserID(req) % 2 == 1;
+  let uid = Type.uniqueUserID(req);
+  let abFlag = uid % 2 == 1;
 
   // Initialize the content package
   handlers.contentPackages[req.params.contentPackage].initialize(req, params, handlers, function (config) {
@@ -49,6 +50,7 @@ Type.initialize = function (req, params, handlers, cb) {
       config.addToTop = undefined;
       config.addToHead = undefined;
       config.addToBody = undefined;
+      config.u = uid;
       config.abFlag = abFlag;
 
       let templateParam = {
