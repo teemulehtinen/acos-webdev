@@ -129,15 +129,17 @@ ACOSWebdev.prototype.grade = function (eventOrMutations) {
     this.extendGrade(eventOrMutations, function (r) {
       if (typeof(r) == 'number') {
         self.update(r);
-      } else if (r !== undefined && typeof(r.points) == 'number') {
-        self.update(r.points, r.feedback);
-      } else {
-        r.time = new Date().getTime();
-        self.log.push(r);
-        self.logQueue++;
-        if (self.logQueue > 3) {
-          self.store('logqueue');
-          self.logQueue = 0;
+      } else if (r !== undefined) {
+        if (typeof(r.points) == 'number') {
+          self.update(r.points, r.feedback);
+        } else {
+          r.time = new Date().getTime();
+          self.log.push(r);
+          self.logQueue++;
+          if (self.logQueue > 3) {
+            self.store('logqueue');
+            self.logQueue = 0;
+          }
         }
       }
     });
