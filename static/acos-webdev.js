@@ -8,7 +8,7 @@ function ACOSWebdev($element, config, points) {
   this.config = config;
   this.config.points = points;
   this.session = this.uuid();
-  this.log = [];
+  this.logStore = [];
   this.logQueue = 0;
   this.touched = false;
   var self = this;
@@ -17,13 +17,9 @@ function ACOSWebdev($element, config, points) {
     let observer = new MutationObserver(function (mutations) {
       mutations.forEach(function (mutation) {
         var n = mutation.type == 'characterData' ? mutation.target.parentNode : mutation.target;
-        self.log.push({
-          type: mutation.type,
-          changed: n.outerHTML,
-          time: new Date().getTime()
-        });
+        self.log({ type: mutation.type, changed: n.outerHTML });
       });
-      if (self.config.mutations) {
+      if (self.config.mutations && !self.config.triggerButton) {
         self.grade(mutations);
       }
     });
@@ -49,34 +45,22 @@ function ACOSWebdev($element, config, points) {
   }
 
   $element.on('click', function (event) {
-    self.log.push({
+    self.log({
       type: 'mouseClick',
       x: event.clientX,
       y: event.clientY,
-      target: event.target.localName,
-      time: new Date().getTime()
+      target: event.target.localName
     });
     self.touched = true;
-    self.logQueue++;
-    if (self.logQueue > 3) {
-      self.store('logqueue');
-      self.logQueue = 0;
-    }
   });
   window.onblur = function (event) {
     if (self.touched) {
-      self.log.push({
-        type: 'windowBlur',
-        time: new Date().getTime()
-      });
+      self.log({ type: 'windowBlur' }, true);
     }
   };
   window.onfocus = function (event) {
     if (self.touched) {
-      self.log.push({
-        type: 'windowFocus',
-        time: new Date().getTime()
-      });
+      self.log({ type: 'windowFocus' }, true);
     }
   };
   window.addEventListener('beforeunload', function (event) {
@@ -84,15 +68,21 @@ function ACOSWebdev($element, config, points) {
   });
 };
 
+ACOSWebdev.prototype.log = function (entry, noStore) {
+  entry.time = new Date().getTime();
+  this.logStore.push(entry);
+  this.logQueue++;
+  if (noStore === undefined && this.logQueue > 4) {
+    this.store('logqueue');
+    this.logQueue = 0;
+  }
+};
+
 ACOSWebdev.prototype.reset = function (initial) {
   var $element = this.$element;
   var config = this.config;
   var self = this;
-
-  this.log.push({
-    type: 'reset',
-    time: new Date().getTime()
-  });
+  this.log({ type: 'reset' }, true);
 
   // Populate problem data.
   $element.find('.instructions').html(config.instructions);
@@ -133,13 +123,7 @@ ACOSWebdev.prototype.grade = function (eventOrMutations) {
         if (typeof(r.points) == 'number') {
           self.update(r.points, r.feedback);
         } else {
-          r.time = new Date().getTime();
-          self.log.push(r);
-          self.logQueue++;
-          if (self.logQueue > 3) {
-            self.store('logqueue');
-            self.logQueue = 0;
-          }
+          self.log(r);
         }
       }
     });
@@ -177,7 +161,7 @@ ACOSWebdev.prototype.update = function (points, feedback) {
     'session': this.session,
     'status': 'graded',
     'feedback': this.extendProtocolFeedback(feedback),
-    'log': JSON.stringify(this.log),
+    'log': JSON.stringify(this.logStore),
     'u': this.config.u,
     'ab': ab
   });
@@ -187,7 +171,7 @@ ACOSWebdev.prototype.store = function (status) {
   ACOS.sendEvent('log', {
     'session': this.session,
     'status': status,
-    'log': JSON.stringify(this.log),
+    'log': JSON.stringify(this.logStore),
     'u': this.config.u,
     'ab': this.config.abFlag
   });
