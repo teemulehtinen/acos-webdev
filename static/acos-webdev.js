@@ -93,7 +93,7 @@ ACOSWebdev.prototype.reset = function (initial) {
   this.extendReset(initial);
 
   // Add configured event listener.
-  if (config.selector && config.events) {
+  if (config.selector && config.events && !config.triggerButton) {
     let $selected = config.selector == '$window' ? $(window) : $element.find(config.selector);
     $selected.on(config.events, function (event) {
       if (config.eventPreventDefault) {
@@ -138,7 +138,7 @@ ACOSWebdev.prototype.extendGrade = function (eventOrMutations, cb) {
 
 ACOSWebdev.prototype.updatePointsDisplay = function (points, colorClass) {
   return this.$element.find('.points')
-    .show()
+    .css('display', 'inline-block')
     .removeClass('red yellow green')
     .addClass(colorClass ? colorClass : '')
     .text(points + " / " + this.config.maxPoints + " p.");

@@ -43,11 +43,6 @@ body {
   font-weight: bold;
   margin: 0 0 0.5em 0;
 }
-.acos-webdev-exercise.vertical .trigger-button,
-.acos-webdev-exercise.vertical .points {
-  float: left;
-  margin: 0 1em 0 0;
-}
 .acos-webdev-exercise button {
   border: 1px solid silver;
   border-radius: 0.5em;
