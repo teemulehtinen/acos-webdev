@@ -26,7 +26,7 @@ const filterLog = async (filePath, newFilePath) => {
         if (bySession[payload.session] !== undefined) {
           lines[bySession[payload.session]] = null;
         }
-        bySession[payload.session] = lines.length;
+        bySession[payload.session] = payload.status !== 'graded' ? lines.length : undefined;
         lines.push(line);
       }
     }
