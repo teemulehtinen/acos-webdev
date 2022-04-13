@@ -155,26 +155,30 @@ ACOSWebdev.prototype.update = function (points, feedback) {
   this.$element.find('.toolbox .feedback').empty().append('<p>' + feedback + '</p>');
   this.updatePointsDisplay(p, col).ACOSWebdevExplosion(col, ab);
   window.parent.postMessage({type: 'acos-resizeiframe-init'}, '*');
-  ACOS.sendEvent('grade', {
-    'points': p,
-    'max_points': mp,
-    'session': this.session,
-    'status': 'graded',
-    'feedback': this.extendProtocolFeedback(feedback),
-    'log': JSON.stringify(this.logStore),
-    'u': this.config.u,
-    'ab': ab
-  });
+  if (this.config.replay === undefined) {
+    ACOS.sendEvent('grade', {
+      'points': p,
+      'max_points': mp,
+      'session': this.session,
+      'status': 'graded',
+      'feedback': this.extendProtocolFeedback(feedback),
+      'log': JSON.stringify(this.logStore),
+      'u': this.config.u,
+      'ab': ab
+    });
+  }
 };
 
 ACOSWebdev.prototype.store = function (status) {
-  ACOS.sendEvent('log', {
-    'session': this.session,
-    'status': status,
-    'log': JSON.stringify(this.logStore),
-    'u': this.config.u,
-    'ab': this.config.abFlag
-  });
+  if (this.config.replay === undefined) {
+    ACOS.sendEvent('log', {
+      'session': this.session,
+      'status': status,
+      'log': JSON.stringify(this.logStore),
+      'u': this.config.u,
+      'ab': this.config.abFlag
+    });
+  }
 };
 
 ACOSWebdev.prototype.extendProtocolFeedback = function (feedback) {
