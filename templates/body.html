@@ -1,3 +1,12 @@
+{% if replayMode %}
+<div id="acos-replay">
+	Replay: <strong class="acos-replay-sec">0</strong> sec
+	<div class="acos-replay-timeline">
+		<canvas id="acos-replay-canvas"></canvas>
+		<div class="acos-replay-progress"></div>
+	</div>
+</div>
+{% endif %}
 <div id="{{ id }}" class="{{ class }} iframe-exact-height {% if verticalLayout %}vertical{% else %}horizontal{% endif %}">
 	{% if verticalLayout %}
 	<p class="instructions"></p>

@@ -62,6 +62,7 @@ Type.initialize = function (req, params, handlers, cb) {
         verticalLayout: config.verticalLayout || false,
         triggerButton: config.triggerButton || false,
         resetButton: config.resetButton || false,
+        replayMode: config.replay || false,
         config: JSON.stringify(config),
         script: typeof(config.script) == 'function' ? config.script.toString() : undefined,
         points: typeof(config.points) == 'function' ? config.points.toString() : undefined

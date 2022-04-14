@@ -13,7 +13,7 @@ function ACOSWebdev($element, config, points) {
   this.touched = false;
   var self = this;
 
-  if (config.mutationObserver) {
+  if (config.mutationObserver && !config.replay) {
     let observer = new MutationObserver(function (mutations) {
       mutations.forEach(function (mutation) {
         var n = mutation.type == 'characterData' ? mutation.target.parentNode : mutation.target;
@@ -33,12 +33,12 @@ function ACOSWebdev($element, config, points) {
 
   self.reset(true);
 
-  if (config.triggerButton) {
+  if (config.triggerButton && !config.replay) {
     $element.find('.toolbox .trigger-button').on('click', function (event) {
       self.grade(event);
     });
   }
-  if (config.resetButton) {
+  if (config.resetButton && !config.replay) {
     $element.find('.toolbox .reset-button').on('click', function (event) {
       self.reset(true);
     });
@@ -93,7 +93,7 @@ ACOSWebdev.prototype.reset = function (initial) {
   this.extendReset(initial);
 
   // Add configured event listener.
-  if (config.selector && config.events && !config.triggerButton) {
+  if (config.selector && config.events && !config.triggerButton && !config.replay) {
     let $selected = config.selector == '$window' ? $(window) : $element.find(config.selector);
     $selected.on(config.events, function (event) {
       if (config.eventPreventDefault) {
@@ -105,6 +105,10 @@ ACOSWebdev.prototype.reset = function (initial) {
 
   if (initial) {
     $element.find('.points').hide();
+  }
+
+  if (config.replay && config.replay.length > 0) {
+    this.prepareReplay();
   }
 
   window.parent.postMessage({type: 'acos-resizeiframe-init'}, '*');
@@ -191,6 +195,111 @@ ACOSWebdev.prototype.uuid = function () {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
+};
+
+ACOSWebdev.prototype.prepareReplay = function () {
+  const replay = this.config.replay;
+  this.$replaySec = $('#acos-replay .acos-replay-sec').text('0 sec');
+  this.$replayBar = $('#acos-replay .acos-replay-progress').css('width', '0%');
+  this.replayIndex = 0;
+  this.replayBegin = replay[0].time;
+  this.replayLength = replay[replay.length - 1].time - this.replayBegin;
+  this.replayLast = Date.now();
+
+  // Mark events on timeline
+  const timeline = document.getElementById('acos-replay-canvas');
+  const ctx = timeline.getContext('2d');
+  ctx.fillStyle = '#888888';
+  for (let i = 0; i < replay.length; i++) {
+    const x = Math.round((replay[i].time - this.replayBegin) / this.replayLength * timeline.width);
+    ctx.fillRect(x, 0, 2, timeline.height);
+  }
+
+  this.replayTo(this.replayBegin);
+}
+
+ACOSWebdev.prototype.replayTo = function (toTime) {
+  if (this.replayTimeout) {
+    clearTimeout(this.replayTimeout);
+  }
+  let event = this.config.replay[this.replayIndex];
+  if (toTime > event.time) {
+    event = this.config.replay[this.replayIndex + 1];
+    while (event && event.time <= toTime) {
+      this.replayEvent(event);
+      this.replayIndex += 1;
+      event = this.config.replay[this.replayIndex + 1];
+    }
+  } else if (toTime < event.time) {
+    event = this.config.replay[this.replayIndex - 1];
+    while (event && event.time >= toTime) {
+      this.replayEvent(event, true);
+      this.replayIndex -= 1;
+      event = this.config.replay[this.replayIndex - 1];
+    }
+  }
+  const ms = toTime - this.replayBegin;
+  this.$replaySec.text(`${Math.round(ms / 1000)}`);
+  this.$replayBar.css('width', `${Math.round(ms / this.replayLength * 100)}%`);
+  event = this.config.replay[this.replayIndex + 1];
+  if (event) {
+    let nextTime = toTime + 100;
+    let delay = event.time - toTime;
+    if (delay > 8000) {
+      let s = Math.round(delay / 1000);
+      if (s < 60) {
+        this.replayMessage(`${s} sec later...`);
+      } else {
+        let m = s / 60;
+        if (m < 60) {
+          this.replayMessage(`${m.toFixed(1)} min later...`);
+        } else {
+          this.replayMessage(`${(m / 60).toFixed(1)} hours later...`);
+        }
+      }
+      nextTime = event.time - 2000;
+    }
+    this.replayTimeout = setTimeout(
+      () => this.replayTo(nextTime),
+      Math.max(0, 100 - (Date.now() - this.replayLast))
+    );
+    this.replayLast = Date.now();
+  }
+};
+
+ACOSWebdev.prototype.replayEvent = function (event, backward) {
+  this.$element.find('.acos-replay-message').remove();
+  if (!this.extendReplayEvent(event, backward)) {
+    switch (event.type) {
+      case 'mouseClick':
+        return this.replayMessage('click', event.x, event.y);
+      case 'windowBlur':
+        return this.replayMessage('window exited focus');
+      case 'windowFocus':
+        return this.replayMessage('window to focus');
+      case 'grade':
+        if (backward) {
+          return this.update(0, '');
+        } else {
+          return this.grade();
+        }
+      default:
+        return this.replayMessage(`unknown event: ${event.type}`);
+    }
+  }
+};
+
+ACOSWebdev.prototype.extendReplayEvent = function (event, backward) {
+  return false;
+}
+
+ACOSWebdev.prototype.replayMessage = function (message, x, y) {
+  this.$element.append($('<div class="acos-replay-message"></div>').html(message).css({
+    position: 'absolute',
+    left: x !== undefined ? `${x}px` : '50%',
+    top: y !== undefined ? `${y}px` : '15%',
+    'z-index': 10,
+  }));
 };
 
 /****

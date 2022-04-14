@@ -3,6 +3,7 @@ body {
 }
 .acos-webdev-exercise {
   overflow: hidden;
+  position: relative;
 }
 .acos-webdev-exercise.horizontal .toolbox {
   width: 40%;
@@ -93,4 +94,30 @@ body {
 }
 li.acos-webdev-poi {
   margin-right: 1em;
+}
+#acos-replay {
+  background: lightcyan;
+  border-bottom: 1px solid grey;
+  padding: 1em;
+}
+.acos-replay-timeline {
+  position: relative;
+  background: lightgrey;
+  height: 1em;
+}
+.acos-replay-timeline canvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.acos-replay-progress {
+  position: absolute;
+  width: 0%;
+  height: 1em;
+  background: rgba(255, 0, 0, 0.6);
+}
+.acos-webdev-exercise .acos-replay-message {
+  background: rgba(230, 230, 230, 0.3);
+  color: white;
+  padding: 1em;
 }
