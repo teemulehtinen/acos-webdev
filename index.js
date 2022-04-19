@@ -53,15 +53,15 @@ Type.initialize = function (req, params, handlers, cb) {
       let addToTop = config.addToTop;
       let addToHead = config.addToHead;
       let addToBody = config.addToBody;
-      config.addToTop = undefined;
-      config.addToHead = undefined;
-      config.addToBody = undefined;
-      config.u = uid;
-      config.abFlag = abFlag;
-      if (replayMode) {
-        config.replay = JSON.parse(decodeURIComponent(req.body.log));
+      const jsConfig = {
+        ...config,
+        addToTop: undefined,
+        addToHead: undefined,
+        addToBody: undefined,
+        u: uid,
+        abFlag: abFlag,
+        replay: replayMode ? JSON.parse(decodeURIComponent(req.body.log)) : undefined,
       }
-
       let templateParam = {
         id: 'acos-' + req.params.contentPackage + '-' + params.name,
         class: 'acos-' + req.params.contentType + '-exercise acos-' + req.params.contentPackage,
@@ -73,7 +73,7 @@ Type.initialize = function (req, params, handlers, cb) {
         triggerButton: config.triggerButton || false,
         resetButton: config.resetButton || false,
         replayMode: replayMode,
-        config: JSON.stringify(config),
+        config: JSON.stringify(jsConfig),
         script: typeof(config.script) == 'function' ? config.script.toString() : undefined,
         points: typeof(config.points) == 'function' ? config.points.toString() : undefined
       };
