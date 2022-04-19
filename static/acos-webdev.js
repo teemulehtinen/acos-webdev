@@ -198,13 +198,19 @@ ACOSWebdev.prototype.uuid = function () {
 };
 
 ACOSWebdev.prototype.prepareReplay = function () {
+  const self = this;
   const replay = this.config.replay;
-  this.$replaySec = $('#acos-replay .acos-replay-sec').text('0 sec');
-  this.$replayBar = $('#acos-replay .acos-replay-progress').css('width', '0%');
   this.replayIndex = 0;
   this.replayBegin = replay[0].time;
   this.replayLength = replay[replay.length - 1].time - this.replayBegin;
   this.replayLast = Date.now();
+
+  $('#acos-replay .acos-replay-total').text(this.formatTime(this.replayLength));
+  this.$replayTimeline = $('#acos-replay .acos-replay-timeline').on('click', (e) => {
+    self.replayTo(self.replayBegin + Math.floor(e.offsetX / self.$replayTimeline.width() * self.replayLength));
+  });
+  this.$replayTime = $('#acos-replay .acos-replay-time').text('0 s');
+  this.$replayBar = $('#acos-replay .acos-replay-progress').css('width', '0%');
 
   // Mark events on timeline
   const timeline = document.getElementById('acos-replay-canvas');
@@ -239,26 +245,17 @@ ACOSWebdev.prototype.replayTo = function (toTime) {
     }
   }
   const ms = toTime - this.replayBegin;
-  this.$replaySec.text(`${Math.round(ms / 1000)}`);
+  this.$replayTime.text(this.formatTime(ms));
   this.$replayBar.css('width', `${Math.round(ms / this.replayLength * 100)}%`);
   event = this.config.replay[this.replayIndex + 1];
   if (event) {
     let nextTime = toTime + 100;
+    /* Disable jumping
     let delay = event.time - toTime;
     if (delay > 8000) {
-      let s = Math.round(delay / 1000);
-      if (s < 60) {
-        this.replayMessage(`${s} sec later...`);
-      } else {
-        let m = s / 60;
-        if (m < 60) {
-          this.replayMessage(`${m.toFixed(1)} min later...`);
-        } else {
-          this.replayMessage(`${(m / 60).toFixed(1)} hours later...`);
-        }
-      }
+      this.replayMessage(`${this.formatTime(delay)} later...`);
       nextTime = event.time - 2000;
-    }
+    } */
     this.replayTimeout = setTimeout(
       () => this.replayTo(nextTime),
       Math.max(0, 100 - (Date.now() - this.replayLast))
@@ -300,6 +297,14 @@ ACOSWebdev.prototype.replayMessage = function (message, x, y) {
     top: y !== undefined ? `${y}px` : '15%',
     'z-index': 10,
   }));
+};
+
+ACOSWebdev.prototype.formatTime = function (t) {
+  let s = Math.round(t / 1000);
+  if (s < 60) {
+    return `${s} s`;
+  }
+  return `${Math.floor(s / 60)}:${s % 60} m:s`;
 };
 
 /****

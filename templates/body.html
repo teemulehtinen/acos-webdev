@@ -1,6 +1,10 @@
 {% if replayMode %}
 <div id="acos-replay">
-	Replay: <strong class="acos-replay-sec">0</strong> sec
+	<div>{{ id }} <em>{{ uid }}</em></div>
+	<div>
+		<div style="float:right;" class="acos-replay-total"></div>
+		Replay: <strong class="acos-replay-time">0</strong>
+	</div>
 	<div class="acos-replay-timeline">
 		<canvas id="acos-replay-canvas"></canvas>
 		<div class="acos-replay-progress"></div>

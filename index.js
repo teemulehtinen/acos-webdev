@@ -37,8 +37,14 @@ Type.uniqueUserID = function (req) {
 
 Type.initialize = function (req, params, handlers, cb) {
 
+  // Support replay mode
+  let replayMode = params.name === 'replay';
+  if (replayMode) {
+    params.name = req.body.key;
+  }
+
   // Select AB-test population
-  let uid = Type.uniqueUserID(req);
+  let uid = replayMode ? req.body.pseudouid : Type.uniqueUserID(req);
   let abFlag = uid % 2 == 1;
 
   // Initialize the content package
@@ -52,17 +58,21 @@ Type.initialize = function (req, params, handlers, cb) {
       config.addToBody = undefined;
       config.u = uid;
       config.abFlag = abFlag;
+      if (replayMode) {
+        config.replay = JSON.parse(decodeURIComponent(req.body.log));
+      }
 
       let templateParam = {
         id: 'acos-' + req.params.contentPackage + '-' + params.name,
         class: 'acos-' + req.params.contentType + '-exercise acos-' + req.params.contentPackage,
+        uid: uid,
         addToTop: addToTop,
         addToHead: addToHead,
         addToBody: addToBody,
         verticalLayout: config.verticalLayout || false,
         triggerButton: config.triggerButton || false,
         resetButton: config.resetButton || false,
-        replayMode: config.replay || false,
+        replayMode: replayMode,
         config: JSON.stringify(config),
         script: typeof(config.script) == 'function' ? config.script.toString() : undefined,
         points: typeof(config.points) == 'function' ? config.points.toString() : undefined
