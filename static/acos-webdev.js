@@ -205,20 +205,23 @@ ACOSWebdev.prototype.prepareReplay = function () {
   this.replayLength = replay[replay.length - 1].time - this.replayBegin;
   this.replayLast = Date.now();
 
-  $('#acos-replay .acos-replay-total').text(this.formatTime(this.replayLength));
+  $('#acos-replay .acos-replay-button').on('click', (e) => {
+    self.replayTo(self.replayBegin);
+  });
   this.$replayTimeline = $('#acos-replay .acos-replay-timeline').on('click', (e) => {
     self.replayTo(self.replayBegin + Math.floor(e.offsetX / self.$replayTimeline.width() * self.replayLength));
   });
   this.$replayTime = $('#acos-replay .acos-replay-time').text('0 s');
+  $('#acos-replay .acos-replay-total').text(this.formatTime(this.replayLength));
   this.$replayBar = $('#acos-replay .acos-replay-progress').css('width', '0%');
 
   // Mark events on timeline
   const timeline = document.getElementById('acos-replay-canvas');
   const ctx = timeline.getContext('2d');
-  ctx.fillStyle = '#888888';
   for (let i = 0; i < replay.length; i++) {
     const x = Math.round((replay[i].time - this.replayBegin) / this.replayLength * timeline.width);
-    ctx.fillRect(x, 0, 2, timeline.height);
+    ctx.fillStyle = this.replayEventColor(replay[i]);
+    ctx.fillRect(x - 0.5, 0, 1, timeline.height);
   }
 
   this.replayTo(this.replayBegin);
@@ -288,7 +291,25 @@ ACOSWebdev.prototype.replayEvent = function (event, backward) {
 
 ACOSWebdev.prototype.extendReplayEvent = function (event, backward) {
   return false;
-}
+};
+
+ACOSWebdev.prototype.replayEventColor = function (event) {
+  const c = this.extendReplayEventColor(event);
+  if (c !== undefined) {
+    return c;
+  }
+  if (event.type === 'grade') {
+    return event.points >= event.maxPoints ? '#00ff7f' : '#ffff00';
+  }
+  if (event.type === 'mouseClick') {
+    return '#888888';
+  }
+  return '#e0e0e0';
+};
+
+ACOSWebdev.prototype.extendReplayEventColor = function (event) {
+  return undefined;
+};
 
 ACOSWebdev.prototype.replayMessage = function (message, x, y) {
   this.$element.append($('<div class="acos-replay-message"></div>').html(message).css({
